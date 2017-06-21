@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Passwordless Hosted Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!--[if IE 8]>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/ie8/0.2.5/ie8.js"></script>
+  <![endif]-->
+
+  <!--[if lte IE 9]>
+    <script src="https://cdn.auth0.com/js/polyfills/1.0/base64.min.js"></script>
+    <script src="https://cdn.auth0.com/js/polyfills/1.0/es5-shim.min.js"></script>
+  <![endif]-->
+
+  <script src="//code.jquery.com/jquery-3.1.0.min.js"></script>
+  <script src="//cdn.auth0.com/js/polyfills/1.0/object-assign.min.js"></script>
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+  <script src="//cdn.auth0.com/js/auth0/8.8/auth0.min.js"></script>
+  <style>
+    @import url(https://fonts.googleapis.com/css?family=Roboto);
+    * {
+      font-family: 'Roboto', sans-serif;
+    }
+
+    #login-modal .modal-dialog {
+      width: 650px;
+    }
+
+    #login-modal input[type=text],
+    input[type=password] {
+      margin-top: 10px;
+    }
+
+    #div-login-msg,
+    #div-lost-msg,
+    #div-register-msg {
+      border: 1px solid #dadfe1;
+      height: 30px;
+      line-height: 28px;
+      transition: all ease-in-out 500ms;
+    }
+
+    #div-login-msg.success,
+    #div-lost-msg.success,
+    #div-register-msg.success {
+      border: 1px solid #68c3a3;
+      background-color: #c8f7c5;
+    }
+
+    #div-login-msg.error,
+    #div-lost-msg.error,
+    #div-register-msg.error {
+      border: 1px solid #eb575b;
+      background-color: #ffcad1;
+    }
+
+    #icon-login-msg,
+    #icon-lost-msg,
+    #icon-register-msg {
+      width: 30px;
+      float: left;
+      line-height: 28px;
+      text-align: center;
+      background-color: #dadfe1;
+      margin-right: 5px;
+      transition: all ease-in-out 500ms;
+    }
+
+    #icon-login-msg.success,
+    #icon-lost-msg.success,
+    #icon-register-msg.success {
+      background-color: #68c3a3 !important;
+    }
+
+    #icon-login-msg.error,
+    #icon-lost-msg.error,
+    #icon-register-msg.error {
+      background-color: #eb575b !important;
+    }
+
+    #img_logo {
+      max-height: 100px;
+      max-width: 100px;
+    }
+    /* #########################################
+       #    override the bootstrap configs     #
+       ######################################### */
+
+    .modal-backdrop.in {
+      filter: alpha(opacity=50);
+      opacity: .8;
+    }
+
+    .modal-content {
+      background-color: #ececec;
+      border: 1px solid #bdc3c7;
+      border-radius: 0px;
+      outline: 0;
+    }
+
+    .modal-header {
+      min-height: 16.43px;
+      padding: 15px 15px 15px 15px;
+      border-bottom: 0px;
+    }
+
+    .modal-body {
+      position: relative;
+      padding: 5px 15px 5px 15px;
+    }
+
+    .modal-footer {
+      padding: 15px 15px 15px 15px;
+      text-align: left;
+      border-top: 0px;
+    }
+
+    .checkbox {
+      margin-bottom: 0px;
+    }
+
+    .btn {
+      border-radius: 0px;
+    }
+
+    .btn:focus,
+    .btn:active:focus,
+    .btn.active:focus,
+    .btn.focus,
+    .btn:active.focus,
+    .btn.active.focus {
+      outline: none;
+    }
+
+    .btn-lg,
+    .btn-group-lg>.btn {
+      border-radius: 0px;
+    }
+
+    .btn-link {
+      padding: 5px 10px 0px 0px;
+      color: #95a5a6;
+    }
+
+    .btn-link:hover,
+    .btn-link:focus {
+      color: #2c3e50;
+      text-decoration: none;
+    }
+
+    .glyphicon {
+      top: 0px;
+    }
+
+    .form-control {
+      border-radius: 0px;
+    }
+    .strike {
+        display: block;
+        text-align: center;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .strike > span {
+        position: relative;
+        display: inline-block;
+    }
+
+    .strike > span:before,
+    .strike > span:after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 9999px;
+        height: 1px;
+        background: black;
+    }
+
+    .strike > span:before {
+        right: 100%;
+        margin-right: 15px;
+    }
+
+    .strike > span:after {
+        left: 100%;
+        margin-left: 15px;
+    }
+  </style>
+</head>
+
+<body>
+  <script type="text/javascript">
+    // hide the page in case there is an SSO session (to avoid flickering)
+     //$('body').hide();
+
+  </script>
+  <div class="modal show" id="login-modal">
+    <div class="modal-dialog">
+      <div class="modal-content col-md-12">
+        <div class="modal-header" align="center">
+          <img class="img" id="img_logo" src="https://i.cloudup.com/auqjMuBIQ5-3000x3000.png">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+        </button>
+          <h3 id="title">Passwordless Hosted Login</h3>
+        </div>
+          <!-- Passwordless Form -->
+            <div class="enter-email">
+              <div class="modal-body">
+                <label> First Name </label>
+                <input class="form-control first_name" required/>
+                <br/>
+                <label> Last Name </label>
+                <input class="form-control last_name" required/>
+                <br/>
+                <div class="strike">
+                    <span></span>
+                </div>
+
+                <label> Enter your email for <strong>One time code</strong></label>
+                <input class="form-control email"/>
+                <br/>
+                <div class="strike">
+                    <span>OR</span>
+                </div>
+                <br/>
+                <label> Enter your phone number <strong>One time code</strong></label>
+                <input class="form-control phone"/>
+                <br/>
+                <button id="send_code" class="btn btn-primary btn-lg btn-block">Send Verification Code</button>
+              </div>
+            </div>
+
+            <div class="enter-code" style='display:none'>
+              <div class="modal-body">
+                <label> Enter the verification code  &nbsp;&nbsp;</label>
+                <input class="form-control code"/>
+                <br/>
+                <button id="verify_code" class="btn btn-primary btn-lg btn-block">Verify One Time Code</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- End # DIV Form -->
+      </div>
+  <script>
+    var config = JSON.parse(decodeURIComponent(escape(window.atob('@@config@@'))));
+    var type = 'email';
+    $(document).ready(function () {
+      var params = Object.assign({
+        domain: config.auth0Domain,
+        clientID: config.clientID,
+        redirectUri: config.callbackURL,
+        responseType: 'code'
+      }, config.internalOptions);
+      var webAuthPasswordless = new auth0.WebAuth(params);
+
+      /*
+      * Passwordless
+      */
+      $('#send_code').click(function (e) {
+        e.preventDefault();
+        if ($('input.email').val() != '') {
+          sendEmail();
+        } else if ($('input.phone').val() != '') {
+          sendSMS();
+        } else {
+          alert('Email is required');
+        }
+      });
+
+      $('#verify_code').click(function (e) {
+        e.preventDefault();
+        login();
+      });
+
+      function sendEmail(){
+        var email = $('input.email').val();
+        webAuthPasswordless.passwordlessStart({
+          connection: 'email',
+          email: email,
+          send: 'code'
+          }, function(err, result) {
+          if (err) {
+            alert('error sending Email: '+ err.error_description);
+            return;
+          }
+          $('.enter-email').hide();
+          $('.enter-code').show();
+        });
+      }
+      function sendSMS(){
+        type = 'sms';
+        var phone = $('input.phone').val();
+        webAuthPasswordless.passwordlessStart({
+            connection: 'sms',
+            phoneNumber: phone,
+            send: 'code'
+          }, function(err, result) {
+          if (err) {
+            alert('error sending Email: '+ err.error_description);
+            return;
+          }
+          $('.enter-email').hide();
+          $('.enter-code').show();
+        });
+      }
+      function login(){
+        var email = $('input.email').val();
+        var phoneNumber = $('input.phone').val();
+        var first_name = $('input.first_name').val();
+        var last_name = $('input.last_name').val();
+        var code = $('input.code').val();
+        var verifyParams = {};
+
+        if (type === 'email') {
+          verifyParams = {
+            connection: 'email',
+            verificationCode: code,
+            email: email
+          };
+        } else {
+            verifyParams = {
+            connection: 'sms',
+            verificationCode: code,
+            phoneNumber: phoneNumber,
+             
+          };
+        }
+        // add additional params to be available in rules.
+        if (first_name != '' && last_name !== '') {
+          verifyParams.first_name = first_name;
+          verifyParams.last_name = last_name;
+        }
+        webAuthPasswordless.passwordlessVerify(verifyParams, function(err, result){
+          if (err) {
+            alert('code verification failed. ');
+          }
+        });
+      };
+    });
+
+  </script>
+</body>
+
+</html>
