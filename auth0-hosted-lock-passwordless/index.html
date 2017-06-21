@@ -1,0 +1,24 @@
+<html>
+  <head>
+    <title>Login</title>
+  </head>
+  <body onLoad="login();">
+  <script src="https://cdn.auth0.com/js/lock-passwordless-2.2.min.js"></script>
+  <script type="text/javascript">
+  function login(){
+    var config = JSON.parse(decodeURIComponent(escape(window.atob('@@config@@'))));
+    config.internalOptions = config.internalOptions || {};
+  
+    var opts = { authParams: config.internalOptions, callbackURL: config.callbackURL };
+    console.log(JSON.stringify(opts));
+    // Initialize Passwordless Lock instance
+    var lock = new Auth0LockPasswordless(config.clientID, config.auth0Domain);
+    // Open Lock in Email Code mode
+    lock.emailcode(opts);
+    //lock.sms(opts);
+    //lock.magiclink(opts);
+  }
+  </script>
+<!--  <a href="javascript:login()">Login</a>-->
+  </body>
+</html>
