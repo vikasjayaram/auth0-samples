@@ -212,8 +212,8 @@
           <h3 id="title">Passwordless Hosted Login</h3>
         </div>
           <!-- Passwordless Form -->
-            <div class="enter-email">
-              <div class="modal-body">
+            <div class="modal-body">
+              <div class="enter-email-phone">
                 <label> First Name </label>
                 <input class="form-control first_name" required/>
                 <br/>
@@ -221,18 +221,10 @@
                 <input class="form-control last_name" required/>
                 <br/>
                 <div class="strike">
-                    <span></span>
+                    <span>AND</span>
                 </div>
-
-                <label> Enter your email for <strong>One time code</strong></label>
-                <input class="form-control email"/>
-                <br/>
-                <div class="strike">
-                    <span>OR</span>
-                </div>
-                <br/>
-                <label> Enter your phone number <strong>One time code</strong></label>
-                <input class="form-control phone"/>
+                <label> Enter your email or phone for <strong>One time code</strong></label>
+                <input class="form-control email-or-phone"/>
                 <br/>
                 <button id="send_code" class="btn btn-primary btn-lg btn-block">Send Verification Code</button>
               </div>
@@ -260,19 +252,18 @@
         redirectUri: config.callbackURL,
         responseType: 'code'
       }, config.internalOptions);
-      var webAuthPasswordless = new auth0.WebAuth(params);
+      var webAuth = new auth0.WebAuth(params);
 
       /*
       * Passwordless
       */
       $('#send_code').click(function (e) {
+        console.log("sending code...");
         e.preventDefault();
-        if ($('input.email').val() != '') {
-          sendEmail();
-        } else if ($('input.phone').val() != '') {
-          sendSMS();
+        if ($('input.email-or-phone').val() !== '') {
+          sendEmailOrSMS();
         } else {
-          alert('Email is required');
+          alert('Email or Phonenumber is required');
         }
       });
 
@@ -281,40 +272,53 @@
         login();
       });
 
-      function sendEmail(){
-        var email = $('input.email').val();
-        webAuthPasswordless.passwordlessStart({
-          connection: 'email',
-          email: email,
-          send: 'code'
-          }, function(err, result) {
-          if (err) {
-            alert('error sending Email: '+ err.error_description);
-            return;
-          }
-          $('.enter-email').hide();
-          $('.enter-code').show();
-        });
-      }
-      function sendSMS(){
-        type = 'sms';
-        var phone = $('input.phone').val();
-        webAuthPasswordless.passwordlessStart({
-            connection: 'sms',
-            phoneNumber: phone,
+      function sendEmailOrSMS(){
+        var emailOrPhone = $('input.email-or-phone').val();
+        type = getEmailOrPhone(emailOrPhone);
+        var startParams;
+        if (type === 'email') {
+          startParams = {
+            connection: 'email',
+            email: emailOrPhone,
             send: 'code'
-          }, function(err, result) {
-          if (err) {
-            alert('error sending Email: '+ err.error_description);
-            return;
-          }
-          $('.enter-email').hide();
-          $('.enter-code').show();
-        });
+          };
+        } else if (type === 'sms') {
+          startParams = {
+            connection: 'sms',
+            phoneNumber: emailOrPhone,
+            send: 'code'
+          };
+        } else {
+          alert('Enter a valid Email or Phonenumber');
+        }
+        if (startParams) {
+          webAuth.passwordlessStart(startParams, function(err, result) {
+            if (err) {
+              alert('error sending Email: '+ err.error_description);
+              return;
+            }
+            $('#login-form').hide();
+            $('.enter-email-phone').hide();
+            $('.enter-code').show();
+          });
+        }
       }
+      
+      function getEmailOrPhone (emailOrPhone) {
+        var emailRegex = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+        // Accepts only Australia numbers
+        var phoneNumbeRegex = /(?:\+?61)?(?:\(0\)[23478]|\(?0?[23478]\)?)\d{8}/;
+        if (emailRegex.test(emailOrPhone)) {
+          return "email";
+        } else if (phoneNumbeRegex.test(emailOrPhone)){
+          return "sms";
+        } else {
+          return "none";
+        }
+      }
+
       function login(){
-        var email = $('input.email').val();
-        var phoneNumber = $('input.phone').val();
+        var emailOrPhone = $('input.email-or-phone').val();
         var first_name = $('input.first_name').val();
         var last_name = $('input.last_name').val();
         var code = $('input.code').val();
@@ -324,13 +328,13 @@
           verifyParams = {
             connection: 'email',
             verificationCode: code,
-            email: email
+            email: emailOrPhone
           };
         } else {
             verifyParams = {
             connection: 'sms',
             verificationCode: code,
-            phoneNumber: phoneNumber,
+            phoneNumber: emailOrPhone,
              
           };
         }
@@ -339,7 +343,7 @@
           verifyParams.first_name = first_name;
           verifyParams.last_name = last_name;
         }
-        webAuthPasswordless.passwordlessVerify(verifyParams, function(err, result){
+        webAuth.passwordlessVerify(verifyParams, function(err, result){
           if (err) {
             alert('code verification failed. ');
           }
