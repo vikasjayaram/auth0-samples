@@ -1,0 +1,14 @@
+{
+  "name": "auth0-generate-hosted-page",
+  "version": "1.0.0",
+  "description": "Generates Auth0 Hosted Page",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "vikasjayaram",
+  "license": "ISC",
+  "dependencies": {
+    "handlebars": "^4.0.10"
+  }
+}
