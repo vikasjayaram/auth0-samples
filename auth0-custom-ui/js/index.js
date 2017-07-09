@@ -64,7 +64,7 @@ $(document).ready(function () {
       responseType: 'token id_token',
       dict: {
         signin: {
-          title: 'CSU TEST APP'
+          title: 'Welcome to Auth0'
         }
       }
     };
