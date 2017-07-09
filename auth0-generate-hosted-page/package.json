@@ -4,7 +4,7 @@
   "description": "Generates Auth0 Hosted Page",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
   "author": "vikasjayaram",
   "license": "ISC",
