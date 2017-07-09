@@ -53,14 +53,18 @@ $(document).ready(function () {
 
   // Auth0 Implementation.
   var config = {};
-  var auth0Hosted = false;
+
+  //Make auth0Hosted = false for local testing.
+  
+  var auth0Hosted = true;
   if (auth0Hosted) {
     config = JSON.parse(decodeURIComponent(escape(window.atob('@@config@@'))));
   } else {
+    // for local testing.
     config = {
-      auth0Domain: 'vjayaram.auth0.com',
-      clientID: 'boR0fxwOO5regAEZ4kn9XKXm6iV9f5v7',
-      callbackURL: 'https://jwt.io',
+      auth0Domain: 'YOUR_AUTH0_DOMAIN',
+      clientID: 'YOUR_CLIENT_ID',
+      callbackURL: 'YOUR_CALLBACK_URL',
       responseType: 'token id_token',
       dict: {
         signin: {
@@ -68,7 +72,6 @@ $(document).ready(function () {
         }
       }
     };
-
   }
 
   var defaultConnection = 'Username-Password-Authentication';
