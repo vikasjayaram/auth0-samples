@@ -13,4 +13,8 @@ Sample project to demostrate [auth0.js](https://github.com/auth0/auth0.js)
 
 ## Login
 
+[[https://github.com/vikasjayaram/auth0-samples/blob/master/screenshots/auth0_custom_ui_login.png|alt=auth0_custom_ui_login]]
+
 ## Signup
+
+[[https://github.com/vikasjayaram/auth0-samples/blob/master/screenshots/auth0_custom_ui_signup.png|alt=auth0_custom_ui_signup]]
