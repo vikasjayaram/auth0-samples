@@ -12,3 +12,5 @@ $ npm start
 ```
 
 or run `node index.js`
+
+The `auth0-hosted.html` will contain the complete html with css and js.
