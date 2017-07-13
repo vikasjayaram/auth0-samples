@@ -2,7 +2,25 @@
 $(document).ready(function () {
   var loader = $('#loader').hide();
   var usePasswordless = false;
-  $('.auth0-form').find('input, textarea').on('keyup blur focus', function (e) {
+
+  var loading = setInterval(function() {
+      $("input").each(function() {
+          if ($(this).val() !== $(this).attr("value")) {
+              var $this = $(this), label = $this.prev('label');
+              if ($this.val() === '') {
+                label.removeClass('active highlight');
+              } else {
+                label.addClass('active highlight');
+              }              
+          }
+      });
+  }, 500);
+  // After 2 seconds we are quite sure all the needed inputs are autofilled then we can stop checking them
+  setTimeout(function() {
+      clearInterval(loading);
+  }, 2000);
+
+  $('.auth0-form').find('input, textarea').on('keyup blur focus paste', function (e) {
     
     var $this = $(this),
         label = $this.prev('label');
@@ -55,16 +73,27 @@ $(document).ready(function () {
   var config = {};
 
   //Make auth0Hosted = false for local testing.
-  
-  var auth0Hosted = true;
+
+  var auth0Hosted = false;
   if (auth0Hosted) {
     config = JSON.parse(decodeURIComponent(escape(window.atob('@@config@@'))));
   } else {
     // for local testing.
-    config = {
+    /*config = {
       auth0Domain: 'YOUR_AUTH0_DOMAIN',
       clientID: 'YOUR_CLIENT_ID',
       callbackURL: 'YOUR_CALLBACK_URL',
+      responseType: 'token id_token',
+      dict: {
+        signin: {
+          title: 'Welcome to Auth0'
+        }
+      }
+    };*/
+    config = {
+      auth0Domain: 'vjayaram.au.auth0.com',
+      clientID: 'nGRZoRGcMHIhggvw1t4MOFucO6Rsvbrv',
+      callbackURL: 'https://jwt.io',
       responseType: 'token id_token',
       dict: {
         signin: {
@@ -81,7 +110,8 @@ $(document).ready(function () {
     domain: config.auth0Domain,
     clientID: config.clientID,
     redirectUri: config.callbackURL,
-    responseType: config.responseType ? config.responseType : 'code',
+    responseType: (config.internalOptions || {}).response_type ||
+          config.callbackOnLocationHash ? 'token' : 'code'
   }, config.internalOptions);
   var webAuth = new auth0.WebAuth(params);
   var authenticate = new auth0.Authentication({
@@ -255,7 +285,8 @@ $(document).ready(function () {
   function loginWithSocial(provider) {
     loader.show();
     webAuth.authorize({
-      connection: provider
+      connection: provider,
+      acr_values: 'http://schemas.openid.net/pape/policies/2007/06/multi-factor'
     }, function(err) {
       loader.hide();
       if (err) displayError(err);
