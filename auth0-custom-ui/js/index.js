@@ -3,50 +3,9 @@ $(document).ready(function () {
   var loader = $('#loader').hide();
   var usePasswordless = false;
 
-  var loading = setInterval(function() {
-      $("input").each(function() {
-          if ($(this).val() !== $(this).attr("value")) {
-              var $this = $(this), label = $this.prev('label');
-              if ($this.val() === '') {
-                label.removeClass('active highlight');
-              } else {
-                label.addClass('active highlight');
-              }              
-          }
-      });
-  }, 500);
-  // After 2 seconds we are quite sure all the needed inputs are autofilled then we can stop checking them
-  setTimeout(function() {
-      clearInterval(loading);
-  }, 2000);
-
-  $('.auth0-form').find('input, textarea').on('keyup blur focus paste', function (e) {
-    
-    var $this = $(this),
-        label = $this.prev('label');
-
-      if (e.type === 'keyup') {
-        if ($this.val() === '') {
-            label.removeClass('active highlight');
-          } else {
-            label.addClass('active highlight');
-          }
-      } else if (e.type === 'blur') {
-        if( $this.val() === '' ) {
-          label.removeClass('active highlight'); 
-        } else {
-          label.removeClass('highlight');   
-        }   
-      } else if (e.type === 'focus') {
-        
-        if( $this.val() === '' ) {
-          label.removeClass('highlight'); 
-        } 
-        else if( $this.val() !== '' ) {
-          label.addClass('highlight');
-        }
-      }
-
+  $("label").each(function() {
+    var label = $(this);
+    label.addClass('active highlight');
   });
 
   $('.tab a').on('click', function (e) {
@@ -79,21 +38,10 @@ $(document).ready(function () {
     config = JSON.parse(decodeURIComponent(escape(window.atob('@@config@@'))));
   } else {
     // for local testing.
-    /*config = {
+    config = {
       auth0Domain: 'YOUR_AUTH0_DOMAIN',
       clientID: 'YOUR_CLIENT_ID',
       callbackURL: 'YOUR_CALLBACK_URL',
-      responseType: 'token id_token',
-      dict: {
-        signin: {
-          title: 'Welcome to Auth0'
-        }
-      }
-    };*/
-    config = {
-      auth0Domain: 'vjayaram.au.auth0.com',
-      clientID: 'nGRZoRGcMHIhggvw1t4MOFucO6Rsvbrv',
-      callbackURL: 'https://jwt.io',
       responseType: 'token id_token',
       dict: {
         signin: {
@@ -251,18 +199,30 @@ $(document).ready(function () {
     errorMessage.style.display = 'block';
   };
 
+  function clearMessage() {
+    var errorMessage = document.getElementById('error-message');
+    errorMessage.innerHTML = '';
+    errorMessage.style.display = 'none';
+    var successMessage = document.getElementById('success-message');
+    successMessage.innerHTML = '';
+    successMessage.style.display = 'none';
+  };
+
   function displayChangePasswordMessage(msg) {
+    clearMessage();
     var successMessage = document.getElementById('success-message');
     successMessage.innerHTML = msg;
     successMessage.style.display = 'block';
   };
 
   function displayPasswordlessMessage(type, emailOrPhone) {
+    clearMessage();
     var pwdlessMessage = document.getElementById('pwdless-message');
     var message = 'An ' + type + ' with the code has been sent to ' + emailOrPhone + '.'
     pwdlessMessage.innerHTML = message;
     pwdlessMessage.style.display = 'block';
   };
+
   /*
   * Social Login / Signup
   */
@@ -285,8 +245,7 @@ $(document).ready(function () {
   function loginWithSocial(provider) {
     loader.show();
     webAuth.authorize({
-      connection: provider,
-      acr_values: 'http://schemas.openid.net/pape/policies/2007/06/multi-factor'
+      connection: provider
     }, function(err) {
       loader.hide();
       if (err) displayError(err);
