@@ -1,11 +1,11 @@
 var config = {
-      auth0Domain: 'vjayaram.au.auth0.com',
-      clientID: '7g2t1Z108v4K8KcpJRdMhwcQO4SXFmjD',
-      callbackURL: 'https://localhost.daplie.me/callback.html',
-      responseType: 'token id_token',
-      dict: {
-        signin: {
-          title: 'Welcome to Auth0'
-        }
-      }
-    };
+  auth0Domain: 'YOUR_AUTH0_DOMAIN',
+  clientID: 'YOUR_CLIENT_ID',
+  callbackURL: 'YOUR_CALLBACK_URL',
+  responseType: 'token id_token',
+  dict: {
+    signin: {
+      title: 'Welcome to Auth0'
+    }
+  }
+};
