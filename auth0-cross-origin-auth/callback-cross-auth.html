@@ -1,0 +1,13 @@
+<head>
+  <title>Auth0 Cross Origin</title>
+  <script src="https://cdn.auth0.com/js/auth0/8.9/auth0.min.js"></script>
+  <script src="js/local.js"></script>
+  <script type="text/javascript">
+    var auth0 = new auth0.WebAuth({
+      clientID: config.clientID,
+      domain: config.auth0Domain,
+      redirectUri: config.callbackURL
+    });
+    auth0.crossOriginAuthenticationCallback();
+  </script>
+</head>

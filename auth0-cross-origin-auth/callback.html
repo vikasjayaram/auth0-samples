@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Auth0 Cross Origin</title>
+    <link rel="stylesheet" type="text/css" href="//cdn.auth0.com/styleguide/1/index.css">
+    <script src="/webpack-dev-server.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="https://cdn.auth0.com/js/auth0/8.9.0/auth0.min.js"></script>
+    <script src="js/local.js"></script>
+    <style>
+      .row {
+        margin:10px 0;
+      }
+      pre {
+        margin: 0 0 10px 0;
+        min-height: 300px;
+      }
+      code {
+        min-height: 300px;
+      }
+      h2 {
+        margin: 20px 0;
+      }
+      code span {
+        color:red;
+      }
+      code details {
+        padding: 5px;
+        border-radius: 4px;
+      }
+      code details p {
+        margin: 5px 0 0 0;
+      }
+      code details.error {
+        background: rgba(255,0,0,0.1);
+      }
+      #clear-console {
+        cursor: pointer;
+      }
+    </style>
+    <script type="text/javascript">
+    function HTMLConsole(options) {
+      this.ele = $(options.selector);
+      this.data = [];
+      var _this = this;
+      var data;
+      if (data = localStorage.getItem("consoleData")) {
+        data = JSON.parse(data);
+        data.forEach(function(d){
+          _this.dumpCallback(d.error ? d : null, d.error ? null : d);
+        });
+      }
+    }
+    HTMLConsole.prototype.clear = function () {
+      this.data = [];
+      this.ele.html('');
+      localStorage.removeItem("consoleData");
+    };
+    HTMLConsole.prototype.dumpCallback = function (err, data) {
+      if (err) {
+        return this.dump(err, 'error');
+      }
+      if (data && data.error) {
+        return this.dump(data, 'error');
+      }
+      if (data) {
+        return this.dump(data);
+      }
+    };
+    HTMLConsole.prototype.dump = function (o, className) {
+      className = className || '';
+      this.data.push(o);
+      localStorage.setItem("consoleData", JSON.stringify(this.data));
+      function replacer(key, value) {
+        if (typeof value === 'object') {
+          return value;
+        }
+        return '<span>' + value + '</span>';
+      }
+      var plainStr = JSON.stringify(o).substr(0,50);
+      var str = JSON.stringify(o, replacer, 4);
+      var html = '<details class="'+ className +'">' +
+                  '<summary>' + plainStr + '</summary>' +
+                  '<p>' + str + '</p>' +
+                  '</details>';
+      this.ele.append(html);
+      this.ele.find('details').removeAttr('open');
+      this.ele.find('details').last().attr('open', true);
+    };
+    </script>
+  </head>
+  <body class="container">
+
+    <div class="row">
+      <div class="col-xs-12">
+        <h2>Console:</h2>
+        <pre><code id="console"></code></pre>
+        <div class="text-right"><i id="clear-console" aria-hidden="true" class="icon-budicon-498 icon"></i></div>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+    var htmlConsole = new HTMLConsole({
+      selector: '#console'
+    });
+    var webAuth = new auth0.WebAuth({
+      clientID: config.clientID,
+      domain: config.auth0Domain,
+      redirectUri: config.callbackURL
+    });
+    webAuth.parseHash(function(err, data) {
+      console.log(err,data);
+      if (err) {
+        return htmlConsole.dumpCallback(err);
+      }
+      if (data) {
+        htmlConsole.dumpCallback(null, data);
+        if (data.accessToken) {
+          webAuth.client.userInfo(data.accessToken, htmlConsole.dumpCallback.bind(htmlConsole));
+        }
+      }
+      window.location.hash = '';
+    });
+    $('#clear-console').click(function () {
+      $('#clear-console').removeClass('icon-budicon-498');
+      $('#clear-console').addClass('icon-budicon-495');
+      htmlConsole.clear();
+      setTimeout(function () {
+        $('#clear-console').removeClass('icon-budicon-495');
+        $('#clear-console').addClass('icon-budicon-498');
+      }, 250);
+    });
+    </script>
+  </body>
+</html>

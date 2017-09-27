@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html >
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Auth0 Cross Origin Login</title>
+  <!--[if IE 8]>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/ie8/0.2.5/ie8.js"></script>
+  <![endif]-->
+
+  <!--[if lte IE 9]>
+    <script src="https://cdn.auth0.com/js/polyfills/1.0/base64.min.js"></script>
+    <script src="https://cdn.auth0.com/js/polyfills/1.0/es5-shim.min.js"></script>
+  <![endif]-->
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">  
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <section>
+    <div id="loader" class="loader"></div>
+    <div class="container">
+      <div class="auth0-form">
+        <div class="login-header">
+          <img src="https://cdn.auth0.com/styleguide/1.0.0/img/badge.svg"/>
+          <h3 id="client-title">Welcome to Auth0</h3>
+        </div>
+        <br/>
+        <ul class="tab-group">
+          <li class="tab active"><a href="#login">Log In</a></li>
+          <li class="tab"><a href="#signup">Sign Up</a></li>
+        </ul>
+        <div id="error-message" class="alert alert-danger"></div>
+        <div id="success-message" class="alert alert-success"></div>
+        <div class="tab-content">
+          
+          <div id="login">   
+            <div id="login-social" class="field-wrap">
+
+              <a class="btn btn-block btn-social btn-facebook" href="#facebook">
+                <span class="fa fa-facebook"></span> Login with Facebook
+              </a>
+              <a class="btn btn-block btn-social btn-twitter" href="#twitter">
+                <span class="fa fa-twitter"></span> Login with Twitter
+              </a>
+
+              <a class="btn btn-block btn-social btn-google" href="#google">
+                <span class="fa fa-google"></span> Login with Google
+              </a>
+
+            </div>
+            <form id="login-form">
+              <div id="outer" style="width:100%">
+                <div id="inner">or</div>
+              </div>          
+              <div class="field-wrap">
+                <label>
+                Email Address<span class="req">*</span>
+                </label>
+                <input id="login_username" type="email" required autocomplete="off"/>
+              </div>
+            
+              <div class="field-wrap">
+                <label>
+                  Password<span class="req">*</span>
+                </label>
+                <input id="login_password" type="password" required autocomplete="off"/>
+              </div>
+              <br/>
+              <p class="center-text"><a href="#change-pwd">Don't remember your password?</a></p>
+            
+              <button class="button button-block">Log In</button>
+            
+            </form>
+
+          </div>
+
+          <!-- forgot password -->
+          <div id="change-password" style='display:none'>
+            <h2>Reset your password</h2>
+            <form id="lost-form">
+              <div class="field-wrap">
+                <label>Enter your email<span class="req">*</span></label>
+                <input id="forgot-email"/>
+              </div>
+              <button class="button button-block">Send Email</button>
+            </form>
+          </div>
+
+          <div id="signup">   
+            <div class="field-wrap">
+
+              <a class="btn btn-block btn-social btn-facebook" href="#facebook">
+                <span class="fa fa-facebook"></span> Signup with Facebook
+              </a>
+              <a class="btn btn-block btn-social btn-twitter" href="#twitter">
+                <span class="fa fa-twitter"></span> Signup with Twitter
+              </a>
+
+              <a class="btn btn-block btn-social btn-google" href="#google">
+                <span class="fa fa-google"></span> Signup with Google
+              </a>
+
+            </div>
+            <div id="outer" style="width:100%">
+              <div id="inner">or</div>
+            </div>
+            <form id="signup-form">         
+              <div class="field-wrap">
+                <label>
+                  First Name<span class="req">*</span>
+                </label>
+                <input id="signup_first_name" type="text" required autocomplete="off" />
+              </div>
+          
+              <div class="field-wrap">
+                <label>
+                  Last Name<span class="req">*</span>
+                </label>
+                <input id="signup_last_name" type="text" required autocomplete="off"/>
+              </div>
+              <div class="field-wrap">
+                <label>
+                  Email Address<span class="req">*</span>
+                </label>
+                <input id="signup_email" type="email" required autocomplete="off"/>
+              </div>
+              
+              <div class="field-wrap">
+                <label>
+                  Password<span class="req">*</span>
+                </label>
+                <input id="signup_password" type="password" required autocomplete="off"/>
+              </div>
+              
+              <button type="submit" class="button button-block">Sign Up</button>
+            
+            </form>
+
+          </div>
+        </div><!-- tab-content -->
+        <!-- Passwordless -->
+        <div id="passwordless">
+          <div id="enter-email-phone">
+            <br/>
+            <div id="outer" style="width:100%">
+              <div id="inner">or</div>
+            </div>
+            <h2>Use Passwordless!</h2>
+            <p class="center-text">Enter your email / mobile number to sign in or create an account</p>
+            <div class="field-wrap">
+              <label> Email or Phone number<span class="req">*</span></label>
+              <input id="email-or-phone"/>
+            </div>
+            <button id="send_code" class="button button-block">Send OTP</button>
+          </div>
+
+          <div id="enter-code" class="field-wrap" style='display:none'>
+            <p id="pwdless-message" class="center-text"></p>
+            <div class="field-wrap">
+              <label> Enter the verification code</label>
+              <input id="code" class="form-control"/>
+            </div>
+            <br/>
+            <p class="center-text"><a href="#no-code">Did not get the code?</a></p>
+            <button id="verify_code" class="button btn-block">Verify OTP</button>
+          </div>
+          <hr>
+          <div id="outer" style="width:100%">
+              <div id="inner">Protected by <strong><a href="https://auth0.com" target="_blank">Auth0</a></strong></div>
+          </div> <!-- /passwordless -->   
+        </div>    
+      </div> <!-- /auth0-container -->   
+    </div>
+  </section>
+  <script src="//code.jquery.com/jquery-3.1.0.min.js"></script>
+  <script src="//cdn.auth0.com/js/polyfills/1.0/object-assign.min.js"></script>
+  <script src="//cdn.auth0.com/js/auth0/8.9/auth0.min.js"></script>
+  <script src="js/local.js"></script>
+  <script src="js/index.js"></script>
+
+</body>
+</html>
